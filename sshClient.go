@@ -57,7 +57,7 @@ func main() {
 
 	var hostKey ssh.PublicKey
 
-	key, err := ioutil.ReadFile("/Users/mchirico/.ssh/id_rsa_private_key")
+	key, err := ioutil.ReadFile(filepath.Join(os.Getenv("HOME"), ".ssh", "id_rsa"))
 	if err != nil {
 		log.Fatalf("Unable to read private key: %v", err)
 	}
