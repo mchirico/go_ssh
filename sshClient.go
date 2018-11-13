@@ -1,5 +1,6 @@
 package main
 
+// Ref: https://github.com/golang/crypto/blob/master/ssh/example_test.go
 // go get -u golang.org/x/crypto/ssh
 import (
 	"bufio"
@@ -44,10 +45,7 @@ func getHostKey(host string) (ssh.PublicKey, error) {
 	return hostKey, nil
 }
 
-func main() {
-
-	user := "mchirico"
-	server := "45.55.125.83:22"
+func exec(user string, server string, command string, results chan string) {
 
 	// If you want to valid keys ...
 	// hostKey, err := getHostKey("smtp.aipiggybot.io")
@@ -96,8 +94,26 @@ func main() {
 	// the remote side using the Run method.
 	var b bytes.Buffer
 	session.Stdout = &b
-	if err := session.Run("uptime"); err != nil {
+	if err := session.Run(command); err != nil {
 		log.Fatal("Failed to run: " + err.Error())
 	}
-	fmt.Println(b.String())
+	results <- b.String()
+}
+
+// Simple Example
+func main() {
+
+	results := make(chan string, 0)
+
+	user := "mchirico"
+	server := "45.55.125.83:22"
+	command := "uptime;sleep 2"
+
+	go exec(user, server, command, results)
+	go exec(user, server, "date", results)
+
+	fmt.Println(<-results)
+	fmt.Println(<-results)
+
+	close(results)
 }
