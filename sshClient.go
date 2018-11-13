@@ -1,5 +1,6 @@
 package main
 
+// Ref: https://github.com/golang/crypto/blob/master/ssh/example_test.go
 // go get -u golang.org/x/crypto/ssh
 import (
 	"bufio"
