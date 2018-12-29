@@ -107,7 +107,7 @@ func main() {
 
 	user := "mchirico"
 	server := "45.55.125.83:22"
-	command := "uptime;sleep 2"
+	command := "uptime;sleep 10"
 
 	go exec(user, server, command, results)
 	go exec(user, server, "date", results)
