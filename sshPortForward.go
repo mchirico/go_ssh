@@ -4,13 +4,12 @@ package main
 // Modified by https://github.com/mchirico
 
 import (
+	"golang.org/x/crypto/ssh"
 	"io"
 	"io/ioutil"
 	"log"
 	"net"
 	"os"
-
-	"golang.org/x/crypto/ssh"
 )
 
 // Get default location of a private key
@@ -100,8 +99,8 @@ func Server(conn *ssh.Client, remoteAddr string, localAddr string) {
 func main() {
 	// Connection settings
 	sshAddr := "aipiggybot.io:22"
-	localAddr := "127.0.0.1:27017"
-	remoteAddr := "127.0.0.1:27017"
+	localAddr := "127.0.0.1:6379" // Redis
+	remoteAddr := "127.0.0.1:6379"
 
 	// Build SSH client configuration
 	cfg, err := makeSshConfig("mchirico")
@@ -118,5 +117,9 @@ func main() {
 
 	// Handle incoming connection
 	Server(conn, remoteAddr, localAddr)
+
+	// Multiple
+	//go Server(conn, remoteAddr, localAddr)
+	//Server(conn, "127.0.0.1:9090", "127.0.0.1:9090")
 
 }
