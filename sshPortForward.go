@@ -1,5 +1,8 @@
 package main
 
+// Inital code by https://github.com/sosedoff
+// Modified by https://github.com/mchirico
+
 import (
 	"io"
 	"io/ioutil"
@@ -42,8 +45,17 @@ func makeSshConfig(user string) (*ssh.ClientConfig, error) {
 
 // Handle local client connections and tunnel data to the remote serverq
 // Will use io.Copy - http://golang.org/pkg/io/#Copy
-func handleClient(client net.Conn, remote net.Conn) {
+func handleClient(client net.Conn, conn *ssh.Client, remoteAddr string) {
+
+	// Establish connection with remote server
+	remote, err := conn.Dial("tcp", remoteAddr)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	defer client.Close()
+	defer remote.Close()
+
 	chDone := make(chan bool)
 
 	// Start remote -> local data transfer
@@ -61,10 +73,28 @@ func handleClient(client net.Conn, remote net.Conn) {
 		if err != nil {
 			log.Println(err)
 		}
+		log.Printf("Transfer done\n")
 		chDone <- true
 	}()
 
 	<-chDone
+}
+
+func Server(conn *ssh.Client, remoteAddr string, localAddr string) {
+
+	// Start local server to forward traffic to remote connection
+	local, err := net.Listen("tcp", localAddr)
+	if err != nil {
+		log.Printf("listen: %v\n", err)
+	}
+
+	for {
+		client, err := local.Accept()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		go handleClient(client, conn, remoteAddr)
+	}
 }
 
 func main() {
@@ -86,26 +116,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	// Establish connection with remote server
-	remote, err := conn.Dial("tcp", remoteAddr)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// Handle incoming connection
+	Server(conn, remoteAddr, localAddr)
 
-	// Start local server to forward traffic to remote connection
-	local, err := net.Listen("tcp", localAddr)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer local.Close()
-
-	// Handle incoming connections
-	for {
-		client, err := local.Accept()
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		handleClient(client, remote)
-	}
 }
