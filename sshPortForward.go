@@ -4,13 +4,12 @@ package main
 // Modified by https://github.com/mchirico
 
 import (
+	"golang.org/x/crypto/ssh"
 	"io"
 	"io/ioutil"
 	"log"
 	"net"
 	"os"
-
-	"golang.org/x/crypto/ssh"
 )
 
 // Get default location of a private key
