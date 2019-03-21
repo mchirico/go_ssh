@@ -82,6 +82,8 @@ func exec(user string, server string, command string, results chan string) {
 		log.Fatal("Failed to dial: ", err)
 	}
 
+	defer client.Close()
+
 	// Each ClientConn can support multiple interactive sessions,
 	// represented by a Session.
 	session, err := client.NewSession()
